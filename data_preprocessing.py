@@ -70,16 +70,16 @@ def preprocessing_fasta_gff(fasta_gz, gff_gz):
     with gzip.open(fasta_gz, "rt") as gzip_fasta:
 
         fasta= []
-        for f in gzip_fasta.readlines():
-            if f[0].isalpha():
-                fasta.append(f)
-            elif fasta:
+        for f in gzip_fasta.readlines(): 
+            if f[0].isalpha(): # check if the line starts with an alphabet
+                fasta.append(f) # add to list fasta
+            elif fasta: # if "chevron" has been already added to fasta, then break 
                 break
-        fasta = "".join(fasta) # concatener list de string en str
+        fasta = "".join(fasta) # concatenate list of string to string
         fasta = fasta.replace("\n","") # replace \n
 
     with gzip.open(gff_gz, "rt") as gzip_gff:
 
-        gff = [f.split("\t") for f in gzip_gff.readlines() if f[0].isalpha()] # Conserver uniquement les lignes commencant par une lettre
+        gff = [f.split("\t") for f in gzip_gff.readlines() if f[0].isalpha()] # keeping only the line starting with a lettre
 
     return fasta, gff
