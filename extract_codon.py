@@ -1,4 +1,19 @@
 def extract_codon_phylum(dseq: dict):
+    """
+    Parameters
+    ----------
+    dseq: dict
+            Dictionary consisting of phylum infomation (accession number, fasta and gff).
+
+    Returns
+    -------
+    ret: dict
+        Dictionary with 3 keys:
+
+            - accession_number: list of accession numbers
+            - start: list of corresponding start codons
+            - stop: list of corresponding stop codons
+    """
     
     ret = {"accession_number": [], "start": [], "stop": []}
 

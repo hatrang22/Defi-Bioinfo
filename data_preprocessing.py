@@ -2,6 +2,7 @@ import  gzip
 import os
 import tarfile
 import warnings
+from shutil import rmtree
 
 def read_phylum(fasta_path, gff_path):
     """
@@ -21,23 +22,24 @@ def read_phylum(fasta_path, gff_path):
             - accession_number: list of accession numbers
             - fasta: list of corresponding fastas
             - gff: list of corresponding gffs
-
     """
 
     fasta_dir = os.path.splitext(fasta_path)[0] # remove extension file
     with tarfile.open(fasta_path) as f:
         f.extractall(fasta_dir)
-    fasta_dir = os.path.join(fasta_dir, os.listdir(fasta_dir)[0]) # files extracted in fasta_dir
+
+    fasta_dir_extract = os.path.join(fasta_dir, os.listdir(fasta_dir)[0]) # files extracted in fasta_dir_extract
 
     gff_dir = os.path.splitext(gff_path)[0] # remove extension file
     with tarfile.open(gff_path) as f:
         f.extractall(gff_dir)
-    gff_dir = os.path.join(gff_dir, os.listdir(gff_dir)[0]) # files extracted in gffr_dir
 
-    list_fasta = [f for f in os.listdir(fasta_dir) if f.endswith(".gz")]
+    gff_dir_extract = os.path.join(gff_dir, os.listdir(gff_dir)[0]) # files extracted in gffr_dir_extract
+
+    list_fasta = [f for f in os.listdir(fasta_dir_extract) if f.endswith(".gz")]
     list_fasta.sort()  # list of sorted fasta names
 
-    list_gff = [f for f in os.listdir(gff_dir) if f.endswith(".gz")]
+    list_gff = [f for f in os.listdir(gff_dir_extract) if f.endswith(".gz")]
     list_gff.sort()  # list of sorted gff names
 
     ret = {"accession_number": [], "fasta": [], "gff": []}  # returned dict
@@ -52,7 +54,10 @@ def read_phylum(fasta_path, gff_path):
 
         if fan == gan:  # check if accession numbers are consistent
 
-            fasta, gff = preprocessing_fasta_gff(os.path.join(fasta_dir, fasta_fn), os.path.join(gff_dir, gff_fn))
+            fasta, gff = preprocessing_fasta_gff(
+                                        os.path.join(fasta_dir_extract, fasta_fn), 
+                                        os.path.join(gff_dir_extract, gff_fn)
+                                    )
 
             ret["fasta"].append(fasta)
 
@@ -63,6 +68,9 @@ def read_phylum(fasta_path, gff_path):
         else:
             warnings.warn(f"Inconsistent accession number between fasta file ({fan}) and gff file ({gan})")
             
+    rmtree(fasta_dir)  # remove extracted fasta directory
+    rmtree(gff_dir)  # remove extracted gff directory
+
     return ret
 
 def preprocessing_fasta_gff(fasta_gz, gff_gz):
