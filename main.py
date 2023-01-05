@@ -22,5 +22,5 @@ codon_phylum = extract_codon_phylum(phylum)
 # ANALYSE
 ####################
 # TODO
-# Example: plot codon repartition for the first bacterie
+# Example: plot of codon repartition for the first bacteria
 plot_codon_repartition(codon_phylum["accession_number"][0], codon_phylum["start"][0], codon_phylum["stop"][0])
