@@ -34,8 +34,8 @@ def extract_codon_1bact(fasta: str, gff: list):
     for i in gff:
         if i[2]=="CDS":
             if i[6]=="+":
-                start_plus.append(fasta[int(i[3])-1 : int(i[3])+2]) #i[3] correspond à l'indice du début de la CSD, on extrait les premiers éléments de la CSD (du fasta, attention pas la même indexation entre python et fasta)
-                stop_plus.append(fasta[int(i[4])-3 : int(i[4])])  #i[4] correspond à l'indice de fin d'une CSD
+                start_plus.append(fasta[int(i[3])-1 : int(i[3])+2]) #i[3] correspond à l'indice du début de la CDS, on extrait les premiers éléments de la CSD (du fasta, attention pas la même indexation entre python et fasta)
+                stop_plus.append(fasta[int(i[4])-3 : int(i[4])])  #i[4] correspond à l'indice de fin d'une CDS
                 
             if i[6]=="-": #attention au sens de lecture du brin '-' !!
                 start_moins.append(fasta[int(i[3])-1 : int(i[3])+2])
