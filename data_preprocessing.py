@@ -88,6 +88,6 @@ def preprocessing_fasta_gff(fasta_gz, gff_gz):
 
     with gzip.open(gff_gz, "rt") as gzip_gff:
 
-        gff = [f.split("\t") for f in gzip_gff.readlines() if f[0].isalpha()] # keeping only the line starting with a lettre
+        gff = [f.split("\t") for f in gzip_gff.readlines() if f[0].isalpha()] # keeping only the line starting with a letter
 
     return fasta, gff
