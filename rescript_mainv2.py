@@ -37,33 +37,74 @@ def counter_and_proportion(result_codons,startoustop):
     """
     Argument startoustop : indicate a string "start" or "stop"
     """
+    d_start={}
+    d_stop={}
+    for cle, liste in result_codons.items():
+        
+        if startoustop == "start":
+            count_start=Counter(liste)
+            pption_start=count_start
+            for i in pption_start:
+                pption_start[i]=count_start[i]/len(liste)
+            d_start[cle]=pption_start          
+        if startoustop == "stop":
+            count_stop=Counter(liste)
+            pption_stop=count_stop
+            for i in count_stop:
+                pption_stop[i]=count_stop[i]/len(result_codons)
+            d_stop[cle]=pption_stop
+        
     if startoustop == "start":
-        count_start=Counter(result_codons)
-        pption_start=count_start
-        for i in pption_start:
-            pption_start[i]=count_start[i]/len(result_codons)
-        return pption_start
+        df=d_start
     if startoustop == "stop":
-        count_stop=Counter(result_codons)
-        pption_stop=count_stop
-        for i in count_stop:
-            pption_stop[i]=count_stop[i]/len(result_codons)
-        return pption_stop
+        df=d_stop
+    return df
 
 #test    
 pption_proteobacteria = counter_and_proportion(start_proteobacteria, "start")
 
-    ### en gardant le format counter
-# count_start_proteobacteria=Counter(start_proteobacteria)
-# pption_start_proteobacteria=count_start_proteobacteria
-# for i in pption_start_proteobacteria:
-#     pption_start_proteobacteria[i] = count_start_proteobacteria[i]/len(start_proteobacteria)
-    ### en passant au format liste    
-# pption_start_proteobacteria=[]
-# for i in count_start_proteobacteria:
-#     codon_start = i
-#     pption_start = count_start_proteobacteria[i]/len(start_proteobacteria)
-#     pption_start_proteobacteria.append([codon_start , pption_start])
+#%%STACKED BARPLOTS
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+#on s'en fiche : unique=np.unique(np.array(tous_codons))
+
+#Pour accéder au counter de chaque ID : list(pption_proteobacteria.values())[i]
+#Pour accéder aux codons du counter : list(list(pption_proteobacteria.values())[i].keys())
+#Pour accéder aux pptions du counter : list(list(pption_proteobacteria.values())[i].values())
+index=list(pption_proteobacteria.keys())
+tous_codons=[]
+for cle, counter in pption_proteobacteria.items():
+    tous_codons=tous_codons+(list(counter.keys()))
+    tous_codons_c=Counter(tous_codons)
+# en regardant counter en triant par value, on voit que 5 codons sont tous communs aux 13 espèces
+communs=['ATG','ATT','CTG','GTG','TTG']
+data={}
+for cle, counter in pption_proteobacteria.items():
+    liste_pption=[]
+    for codon in communs:
+        for key, pption in counter.items():
+            if codon==key:
+                liste_pption.append(pption)
+                data[codon]=liste_pption
+#data devrait faire 5 listes de 13 éléments chacune (voir objet tous_codons_c)
+
+dataframe=pd.DataFrame(data, index)
+
+dataframe.plot(
+    x = 'index',
+    kind = 'barh',
+    stacked = True,
+    title = 'Stacked Bar Graph',
+    mark_right = True)
+
+# Ci-dessous un tracé de barplots non empilés, il y en a un par espèce. Mais tout ça ne nous sert à rien!
+# for cle, counter in pption_proteobacteria.items():
+#     y_pos = range(len(list(counter.keys())))
+#     plt.bar(y_pos, sorted(list(counter.values())))
+#     plt.xticks(y_pos, sorted(list(counter.keys())),fontsize=5,rotation=50)
+#     plt.show()
+
 #%% TEST SHAPIRO
 import numpy as np
 from scipy.stats import shapiro
