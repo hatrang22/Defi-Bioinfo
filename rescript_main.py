@@ -13,10 +13,7 @@ fasta = preprocess_fasta(fasta_pw)
 #%% extract codon
 from rescript_codon_extraction import extract_codon_1bact
 
-start,stop = extract_codon_1bact(fasta, df_gff)
+phylum_start,phylum_stop = extract_codon_1bact(fasta, df_gff)
 
 #%%Count codon
 from collections import Counter
-
-count_start=Counter(start)
-count_stop=Counter(stop)
