@@ -16,11 +16,13 @@ def rev_comp_st(seq):
         
 #%% extract codon
 def extract_codon_1bact(fasta: dict, gff):
-    #On extrait les codons start et stop
-    start_plus,stop_plus,start_moins,stop_moins = ([] for i in range(4))
-    
-    for i in gff.index:
-        for cle,seq in fasta.items() :
+    d_start={} #dictionnaire avec ID, stop et start
+    d_stop={}
+    for cle,seq in fasta.items() :
+        
+    #On extrait les codons start et stop pour un ID
+        start_plus,stop_plus,start_moins,stop_moins = ([] for i in range(4))
+        for i in gff.index:
             if gff.loc[i,'ID']==cle:
                 if gff.loc[i,'strand']=="+":
                     start_plus.append(seq[int(gff.loc[i,'start'])-1 : int(gff.loc[i,'start'])+2]) #i[3] correspond à l'indice du début de la CSD, on extrait les premiers éléments de la CSD (du fasta, attention pas la même indexation entre python et fasta)
@@ -29,12 +31,15 @@ def extract_codon_1bact(fasta: dict, gff):
                 if gff.loc[i,'strand']=="-": #attention au sens de lecture du brin '-' !!
                     start_moins.append(seq[int(gff.loc[i,'start'])-1 : int(gff.loc[i,'start'])+2])
                     stop_moins.append(seq[int(gff.loc[i,'stop'])-3 : int(gff.loc[i,'stop'])])
+            
+        rev_comp_st(stop_moins)
+        rev_comp_st(start_moins)
+        
+        # On fusionne les codons strand + et -
+        start = start_plus + stop_moins
+        stop = stop_plus + start_moins
+            
+        d_start[cle]=start
+        d_stop[cle]=stop
 
-    rev_comp_st(stop_moins)
-    rev_comp_st(start_moins)
-
-    # On fusionne les codons strand + et -
-    start = start_plus + stop_moins
-    stop = stop_plus + start_moins
-
-    return start, stop
+    return d_start,d_stop
