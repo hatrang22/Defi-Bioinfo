@@ -31,6 +31,7 @@ start_firmicutes,stop_firmicutes = extract_codon_1bact(fasta_firmicutes, gff_fir
 
 # start_actinobacteria,stop_actinobacteria = extract_codon_1bact(fasta_actinobacteria, gff_actinobacteria)
 # start_cfb,stop_cfb = extract_codon_1bact(fasta_cfb, gff_cfb)
+
 #%% Count codons & Proportions
 from collections import Counter
 def counter_and_proportion(result_codons,startoustop):
@@ -63,33 +64,42 @@ def counter_and_proportion(result_codons,startoustop):
 #test    
 pption_proteobacteria = counter_and_proportion(start_proteobacteria, "start")
 
-#%%STACKED BARPLOTS
+#%% Transform df proportions into data.frame of codons proportions
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-#on s'en fiche : unique=np.unique(np.array(tous_codons))
 
-#Pour accéder au counter de chaque ID : list(pption_proteobacteria.values())[i]
-#Pour accéder aux codons du counter : list(list(pption_proteobacteria.values())[i].keys())
-#Pour accéder aux pptions du counter : list(list(pption_proteobacteria.values())[i].values())
-index=list(pption_proteobacteria.keys())
-tous_codons=[]
-for cle, counter in pption_proteobacteria.items():
-    tous_codons=tous_codons+(list(counter.keys()))
-    tous_codons_c=Counter(tous_codons)
-# en regardant counter en triant par value, on voit que 5 codons sont tous communs aux 13 espèces
-communs=['ATG','ATT','CTG','GTG','TTG']
-data={}
-for cle, counter in pption_proteobacteria.items():
-    liste_pption=[]
-    for codon in communs:
-        for key, pption in counter.items():
-            if codon==key:
-                liste_pption.append(pption)
-                data[codon]=liste_pption
-#data devrait faire 5 listes de 13 éléments chacune (voir objet tous_codons_c)
+def give_df_codon_pption_per_phylum(dictionnary_propotions:dict):
+    """
+    Parameters
+    ----------
+    all_codons_phylum : list
+    dictionnary_propotions : dict
 
-dataframe=pd.DataFrame(data, index)
+    Returns
+    -------
+    df : panda dataframe
+        Data frame des proportions des codons
+
+    """
+    #on extrait liste de tous les codons du phylum
+    tous_codons=[]
+    for counter in dictionnary_propotions.values():
+        tous_codons=tous_codons+(list(counter.keys())) 
+        
+    #on produit panda data frame des proportions de chaque codons dans un phylum
+    df = pd.DataFrame(index=[tous_codons])
+    for organism,counter in dictionnary_propotions.items(): #pour chaque organisme
+        for key,value in counter.items(): #pour chaque codon (key)
+                df.loc[key,organism]=value
+    
+    #on remplace les nan par des valeurs 0          
+    df = df.fillna(0)
+    return df
+
+dataframe= give_df_codon_pption_per_phylum(pption_proteobacteria)
+
+#%%STACKED BARPLOTS
 
 dataframe.plot(
     x = 'index',
