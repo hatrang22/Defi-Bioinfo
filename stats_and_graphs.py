@@ -132,21 +132,6 @@ def top3_stacked_barplot(dataframe, phylum, startoustop):
 top3_stacked_barplot(df_proteobacteria,"Proteobacteria","start")
 top3_stacked_barplot(df_firmicutes,"Frimicutes","start")
 
-# import scipy.stats as stats
-# def student_test(proportions_codons1,proportions_codons2,nom_phylum1,nom_phylum2):
-#     if sorted(proportions_codons1.keys())==sorted(proportions_codons2.keys()):
-#         Student=stats.ttest_ind(list(proportions_codons1.values()),list(proportions_codons2.values()))
-#         if Student.pvalue < 0.05:
-#             return print("Test de Student entre", nom_phylum1, "et", nom_phylum2,
-#                   "=> moyennes non égales", Student.pvalue)
-#         else:
-#             return print("Test de Student entre", nom_phylum1, "et", nom_phylum2,
-#                   "=> moyennes égales", Student.pvalue)
-        
-# #test
-# student_test(counter_and_proportion(start_firmicutes), 
-#              counter_and_proportion(start_proteobacteria),
-#              "Firmicutes", "Proteobacteria")
 
 #%% PCA
 import seaborn as sns
@@ -181,6 +166,21 @@ def df_pour_PCA(dataframe, nom_phylum):
         
     df_bis=dataframe.assign(phylum=phylum)
     return df_bis
+
+#%% BOXPLOTS
+import seaborn as sns
+def df_pour_boxplots(dataframe, nom_phylum):
+    sum = dataframe.sum()
+    sum = sum[:-1]
+    for i in range(len(sum)):
+        sum[i]=(float(sum[i])/len(sum))
+    df_sum = pd.DataFrame(index=list(sum.index),data=list(sum.values))
+    df_sum.columns=['Somme']
+    top=df_sum.sort_values(by='Somme', ascending=False)[:3]
+    df_boxs=dataframe[list(top.index)]
+    df_boxs=pd.melt(df_boxs)
+    df_boxs = df_pour_PCA(df_boxs, nom_phylum)
+    return df_boxs
 
 
 

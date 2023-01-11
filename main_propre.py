@@ -1,13 +1,14 @@
 import pandas as pd
 import numpy as np
+import seaborn as sns
 from Bio import SeqIO
 from collections import Counter
-
+from sklearn.decomposition import PCA
 #Nos fonctions
 from rescript_pretraitement import preprocess_gff, preprocess_fasta
 from rescript_codon_extraction import extract_codon_1bact
-from rescript_mainv2 import (counter_and_proportion, give_df_codon_pption_per_phylum, 
-                             top3_stacked_barplot, df_pour_PCA)
+from stats_and_graphs import (counter_and_proportion, give_df_codon_pption_per_phylum, 
+                             top3_stacked_barplot, df_pour_PCA, df_pour_boxplots)
 
 # Import des fichiers fasta et gff 
 # Deux exemples start : Proteobacteria & Firmicutes
@@ -39,9 +40,16 @@ df2=df_pour_PCA(df_firmicutes, "Firmicutes")
 # On fusionne les 2 dataframes pour faire la PCA
 fusion=pd.concat([df1,df2])
 # On visualise les 2 phyla avec 2 couleurs différentes sur le scatter plot
-import seaborn as sns
-from sklearn.decomposition import PCA
 pca = PCA(n_components=2)
 pcs = pca.fit_transform(fusion.drop('ID', axis=1).drop('phylum',axis=1))
 sns.scatterplot(x=pcs[:,0], y=pcs[:,1], hue=fusion['phylum'])
+
+# Boxplots  pour le top3
+boxs_proteo = df_pour_boxplots(df_proteobacteria, "Proteobacteria")
+boxs_firmi = df_pour_boxplots(df_firmicutes, "Firmicutes")
+# On fusionne pour faire le boxplot
+boxs_fusion=pd.concat([boxs_proteo,boxs_firmi])
+sns.boxplot(x='variable', y='value', data=boxs_fusion, hue='phylum')
+
+
 
