@@ -1,36 +1,3 @@
-#%% preprocess
-import pandas as pd
-from Bio import SeqIO
-
-from rescript_pretraitement import preprocess_gff, preprocess_fasta
-
-fasta_pw_proteobacteria="D:/Mes Documents/INSA/5A/UF7 - Défi Bioinfo/Defi-Bioinfo-main/demo_data/proteobacteria.fasta"
-gff_pw_proteobacteria="D:/Mes Documents/INSA/5A/UF7 - Défi Bioinfo/Defi-Bioinfo-main/demo_data/proteobacteria.gff3"
-gff_proteobacteria = preprocess_gff(gff_pw_proteobacteria)
-fasta_proteobacteria = preprocess_fasta(fasta_pw_proteobacteria)
-
-fasta_pw_firmicutes="D:/Mes Documents/INSA/5A/UF7 - Défi Bioinfo/Defi-Bioinfo-main/demo_data/firmicutes.fasta"
-gff_pw_firmicutes="D:/Mes Documents/INSA/5A/UF7 - Défi Bioinfo/Defi-Bioinfo-main/demo_data/firmicutes.gff3"
-gff_firmicutes = preprocess_gff(gff_pw_firmicutes)
-fasta_firmicutes = preprocess_fasta(fasta_pw_firmicutes)
-
-# fasta_pw_actinobacteria="D:/Mes Documents/INSA/5A/UF7 - Défi Bioinfo/Defi-Bioinfo-main/demo_data/actinobacteria.fasta"
-# gff_pw_actinobacteria="D:/Mes Documents/INSA/5A/UF7 - Défi Bioinfo/Defi-Bioinfo-main/demo_data/actinobacteria.gff3"
-# gff_actinobacteria = preprocess_gff(gff_pw_actinobacteria)
-# fasta_actinobacteria = preprocess_fasta(fasta_pw_actinobacteria)
-
-# fasta_pw_cfb="D:/Mes Documents/INSA/5A/UF7 - Défi Bioinfo/Defi-Bioinfo-main/demo_data/cfb.fasta"
-# gff_pw_cfb="D:/Mes Documents/INSA/5A/UF7 - Défi Bioinfo/Defi-Bioinfo-main/demo_data/cfb.gff3"
-# gff_cfb = preprocess_gff(gff_pw_cfb)
-# fasta_cfb = preprocess_fasta(fasta_pw_cfb)
-#%% extract codon
-from rescript_codon_extraction import extract_codon_1bact
-
-start_proteobacteria,stop_proteobacteria = extract_codon_1bact(fasta_proteobacteria, gff_proteobacteria)
-start_firmicutes,stop_firmicutes = extract_codon_1bact(fasta_firmicutes, gff_firmicutes)
-
-# start_actinobacteria,stop_actinobacteria = extract_codon_1bact(fasta_actinobacteria, gff_actinobacteria)
-# start_cfb,stop_cfb = extract_codon_1bact(fasta_cfb, gff_cfb)
 #%% Count codons & Proportions
 from collections import Counter
 def counter_and_proportion(result_codons):
@@ -51,11 +18,9 @@ def counter_and_proportion(result_codons):
             d[cle]=pption          
     return d
 
-#test    
-pption_proteobacteria = counter_and_proportion(start_proteobacteria)
-pption_firmicutes = counter_and_proportion(start_firmicutes)
 #%% DATAFRAME TRANSFORMATION
 import numpy as np
+import pandas as pd
 def give_df_codon_pption_per_phylum(dictionnary_propotions:dict):
     """
     Parameters
@@ -83,20 +48,6 @@ def give_df_codon_pption_per_phylum(dictionnary_propotions:dict):
     df=df.assign(ID=list(df.index))
     return df
 
-df_proteobacteria=give_df_codon_pption_per_phylum(pption_proteobacteria)
-df_firmicutes=give_df_codon_pption_per_phylum(pption_firmicutes)
-
-# Anciens graphes impossibles à lire à cause des couleurs et trop de codons
-# fig_proteobacteria=df_proteobacteria.plot(x = 'ID', kind = 'barh', stacked = True, 
-#                     title = 'Stacked Bar Graph of Proteobacteria Start Codons', 
-#                     mark_right = True)
-# fig_proteobacteria.legend(ncol=8,bbox_to_anchor =(0.4,-0.7),loc="lower center")
-
-# fig_firmicutes=df_firmicutes.plot(x = 'ID', kind = 'barh', stacked = True, 
-#                     title = 'Stacked Bar Graph of Firmicutes Start Codons', 
-#                     mark_right = True)
-# fig_firmicutes.legend(ncol=8,bbox_to_anchor =(0.4,-0.7),loc="lower center")
-
 #%% TOP3
 def top3_stacked_barplot(dataframe, phylum, startoustop):
     """
@@ -123,19 +74,16 @@ def top3_stacked_barplot(dataframe, phylum, startoustop):
     sous_df = sous_df.assign(ID=list(dataframe.index))
     
     #on crée une figure du top3
+    #plt.figure(figsize=(300,150))
     fig=sous_df.plot(x = 'ID', kind = 'barh', stacked = True, 
                        title = 'Stacked Bar Graph of '+phylum+' '+startoustop +' codons', 
-                       mark_right = True)
-    fig.legend(ncol=4,bbox_to_anchor =(0.4,-0.2),loc="lower center")
-
-#test
-top3_stacked_barplot(df_proteobacteria,"Proteobacteria","start")
-top3_stacked_barplot(df_firmicutes,"Frimicutes","start")
-
+                       mark_right = True, figsize=(8,10), fontsize=10)
+    fig.legend(ncol=4,bbox_to_anchor =(0.4,-0.1),loc="lower center")
 
 #%% PCA
 import seaborn as sns
 from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
 
 def df_pour_PCA(dataframe, nom_phylum):
     """
@@ -150,22 +98,29 @@ def df_pour_PCA(dataframe, nom_phylum):
     """
     phylum=[]
     for i in range(len(dataframe)):
-        phylum.append(nom_phylum)
-    import plotly.express as px
-    from sklearn.decomposition import PCA
-    
-    df = px.data.iris()
-    X = df[['sepal_length', 'sepal_width', 'petal_length', 'petal_width']]
-    
-    pca = PCA(n_components=2)
-    components = pca.fit_transform(X)
-    
-    fig = px.scatter(components, x=0, y=1, color=df['species'])
-    fig.show()    
-        
-        
+        phylum.append(nom_phylum) 
     df_bis=dataframe.assign(phylum=phylum)
     return df_bis
+
+def PCA_tous(df1,df2,df3,df4,df5,df6,df7):
+    df1=df_pour_PCA(df1,'Proteobacteria')
+    df2=df_pour_PCA(df2, "Firmicutes")
+    df3=df_pour_PCA(df3, 'Actinobacteria')
+    df4=df_pour_PCA(df4, 'CFB')
+    df5=df_pour_PCA(df5, 'Fusobacteria')
+    df6=df_pour_PCA(df6, 'Spirochetes')
+    df7=df_pour_PCA(df7, 'Cyanobacteria')
+    #On fusionne
+    fusion=pd.concat([df1,df2,df3,df4,df5,df6,df7], ignore_index=True)
+    fusion = fusion.fillna(0)
+    #On fait la PCA
+    pca = PCA(n_components=2)
+    pcs = pca.fit_transform(fusion.drop('ID', axis=1).drop('phylum',axis=1))
+    #On trace le scatter plot
+    fig=sns.scatterplot(x=pcs[:,0], y=pcs[:,1], hue=fusion['phylum']) 
+    plt.xlabel('PC 1 (%.2f%%)' % (pca.explained_variance_ratio_[0]*100))
+    plt.ylabel('PC 2 (%.2f%%)' % (pca.explained_variance_ratio_[1]*100))
+    fig.legend(ncol=4,bbox_to_anchor =(0.45,-0.35),loc="lower center")
 
 #%% BOXPLOTS
 import seaborn as sns
@@ -182,6 +137,21 @@ def df_pour_boxplots(dataframe, nom_phylum):
     df_boxs = df_pour_PCA(df_boxs, nom_phylum)
     return df_boxs
 
+def boxplots_tous(df1,df2,df3,df4,df5,df6,df7):
+    boxs1 = df_pour_boxplots(df1, "Proteobacteria")
+    boxs2 = df_pour_boxplots(df2, "Firmicutes")
+    boxs3 = df_pour_boxplots(df3, "Actinobacteria")
+    boxs4 = df_pour_boxplots(df4, 'CFB')
+    boxs5 = df_pour_boxplots(df5, 'Fusobacteria')
+    boxs6 = df_pour_boxplots(df6, 'Spirochetes')
+    boxs7 = df_pour_boxplots(df7, 'Cyanobacteria')
+    # On fusionne pour faire le boxplot
+    boxs_fusion = pd.concat([boxs1,boxs2,boxs3,boxs4,boxs5,boxs6,boxs7])
+    boxs_fusion = boxs_fusion.fillna(0)
+    fig=sns.boxplot(x='variable', y='value', data=boxs_fusion, hue='phylum')
+    plt.xlabel('Top3 des codons')
+    plt.ylabel('Proportion (%)')
+    fig.legend(ncol=4,bbox_to_anchor =(0.45,-0.35),loc="lower center")
 
 
 

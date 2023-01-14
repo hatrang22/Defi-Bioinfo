@@ -14,7 +14,6 @@ from Bio import SeqIO
 
 def preprocess_fasta(fasta_datapath):
     fasta_dictio={}
-    
     fasta_sequences = SeqIO.parse(open(fasta_datapath),'fasta')
     for fasta in fasta_sequences:
         identity, sequence, description = str(fasta.id), str(fasta.seq),str(fasta.description)

@@ -26,12 +26,23 @@ def extract_codon_1bact(fasta: dict, gff):
             if gff.loc[i,'ID']==cle:
                 if gff.loc[i,'strand']=="+":
                     start_plus.append(seq[int(gff.loc[i,'start'])-1 : int(gff.loc[i,'start'])+2]) #i[3] correspond à l'indice du début de la CSD, on extrait les premiers éléments de la CSD (du fasta, attention pas la même indexation entre python et fasta)
-                    stop_plus.append(seq[int(gff.loc[i,'stop'])-3 : int(gff.loc[i,'stop'])])  #i[4] correspond à l'indice de fin d'une CSD
                     
+                    if int(gff.loc[i,'stop']) > len(seq)-1:
+                        continue
+                    else:
+                        stop_plus.append(seq[int(gff.loc[i,'stop'])-3 : int(gff.loc[i,'stop'])])  #i[4] correspond à l'indice de fin d'une CSD
+                    # if seq[int(gff.loc[i,'stop'])-3 : int(gff.loc[i,'stop'])] == '':
+                    #     print(i, "Stop+")
+                        
                 if gff.loc[i,'strand']=="-": #attention au sens de lecture du brin '-' !!
                     start_moins.append(seq[int(gff.loc[i,'start'])-1 : int(gff.loc[i,'start'])+2])
-                    stop_moins.append(seq[int(gff.loc[i,'stop'])-3 : int(gff.loc[i,'stop'])])
-            
+                    
+                    if int(gff.loc[i,'stop']) > len(seq)-1:
+                        continue
+                    else:
+                        stop_moins.append(seq[int(gff.loc[i,'stop'])-3 : int(gff.loc[i,'stop'])])
+                    # if seq[int(gff.loc[i,'stop'])-3 : int(gff.loc[i,'stop'])] == '':
+                    #     print(i, "Stop-")
         rev_comp_st(stop_moins)
         rev_comp_st(start_moins)
         
@@ -43,3 +54,5 @@ def extract_codon_1bact(fasta: dict, gff):
         d_stop[cle]=stop
 
     return d_start,d_stop
+
+
