@@ -1,5 +1,6 @@
 import pandas as pd
 from Bio import SeqIO
+import os
 
 #%% df_gff
 def preprocess_gff(gff_datapath) :
@@ -35,3 +36,10 @@ def preprocess_fasta(fasta_datapath):
             fasta_dictio[identity] = sequence
             
     return fasta_dictio
+
+def data_preprocessing(data_dir, phylum_name, fasta_ext, gff_ext):
+
+    gff = preprocess_gff(os.path.join(data_dir, phylum_name + gff_ext))
+    fasta = preprocess_fasta(os.path.join(data_dir, phylum_name + fasta_ext))
+
+    return fasta, gff

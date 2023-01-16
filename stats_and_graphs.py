@@ -1,56 +1,7 @@
-from collections import Counter
-import numpy as np
 import pandas as pd
 import seaborn as sns
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
-
-#%% Count codons & Proportions
-def counter_and_proportion(result_codons):
-    """
-    Parameters
-    ----------
-    result_codons : dict, sortie de extract_codon_1bact
-    Returns
-    -------
-    d : dict, sous la forme de counter avec les proportions calculées
-    """
-    d={}
-    for cle, liste in result_codons.items():
-            count=Counter(liste)
-            pption=count
-            for i in pption:
-                pption[i]=count[i]/len(liste)
-            d[cle]=pption          
-    return d
-
-#%% DATAFRAME TRANSFORMATION
-def give_df_codon_pption_per_phylum(dictionnary_propotions:dict):
-    """
-    Parameters
-    ----------
-    dictionnary_propotions : dict
-    Returns
-    -------
-    df : panda dataframe
-        Data frame des proportions des codons
-    """
-    #on extrait liste de tous les codons du phylum
-    tous_codons=[]
-    for counter in dictionnary_propotions.values():
-        tous_codons=tous_codons+(list(counter.keys())) 
-    unique=np.unique(np.array(tous_codons))
-    #on produit panda data frame des proportions de chaque codons dans un phylum
-    df = pd.DataFrame(index=unique)
-    for organism,counter in dictionnary_propotions.items(): #pour chaque organisme
-        for key,value in counter.items(): #pour chaque codon (key)
-                df.loc[key,organism]=value
-    
-    #on remplace les nan par des valeurs 0          
-    df = df.fillna(0)
-    df=df.T
-    df=df.assign(ID=list(df.index))
-    return df
 
 #%% TOP3
 def top3_stacked_barplot(dataframe, phylum, startoustop):
@@ -80,7 +31,7 @@ def top3_stacked_barplot(dataframe, phylum, startoustop):
     #on crée une figure du top3
     #plt.figure(figsize=(300,150))
     fig=sous_df.plot(x = 'ID', kind = 'barh', stacked = True, 
-                       title = 'Stacked Bar Graph of '+phylum+' '+startoustop +' codons', 
+                       title = f"Stacked Bar Graph of {phylum} {startoustop} codons", 
                        mark_right = True, figsize=(8,10), fontsize=10)
     fig.legend(ncol=4,bbox_to_anchor =(0.4,-0.1),loc="lower center")
     plt.show()
@@ -103,7 +54,7 @@ def df_pour_PCA(dataframe, nom_phylum):
     df_bis=dataframe.assign(phylum=phylum)
     return df_bis
 
-def PCA_tous(dfs, pls):
+def PCA_all(dfs, pls):
     # dfs: list of dataframes
     # pls: list of phylum names
 
@@ -138,7 +89,7 @@ def df_pour_boxplots(dataframe, nom_phylum):
     df_boxs = df_pour_PCA(df_boxs, nom_phylum)
     return df_boxs
 
-def boxplots_tous(dfs, pls):
+def boxplots_all(dfs, pls):
 
     boxs = [df_pour_boxplots(df, name) for df, name in zip(dfs, pls)]
 

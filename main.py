@@ -1,12 +1,11 @@
-from data_preprocessing import preprocess_gff, preprocess_fasta
-from codon_extraction import extract_codon_1bact
-from stats_and_graphs import (counter_and_proportion, give_df_codon_pption_per_phylum, 
-                             top3_stacked_barplot, PCA_tous, boxplots_tous)
+from data_preprocessing import data_preprocessing
+from codon_extraction import extract_codon
+from stats_and_graphs import (top3_stacked_barplot, PCA_all, boxplots_all)
 import os
 
 #%% Define global variables
 # =========================
-DATA_PATH = "demo_data"
+DATA_PATH = "../data"
 
 FASTA_EXTENSION = ".fasta"
 GFF_EXTENSION = ".gff3"
@@ -19,39 +18,39 @@ list_phylum = [f.split(".")[0] for f in os.listdir(DATA_PATH) if f.endswith("fas
 dfs_start = []
 dfs_stop = []
 
-for phylum in list_phylum:
+for phylum_name in list_phylum:
     #%% Import files: fasta and gff
-    gff = preprocess_gff(os.path.join(DATA_PATH, phylum + GFF_EXTENSION))
-    fasta = preprocess_fasta(os.path.join(DATA_PATH, phylum + FASTA_EXTENSION))
+    fasta, gff = data_preprocessing(DATA_PATH, phylum_name, FASTA_EXTENSION, GFF_EXTENSION)
 
-    #%% get start and stop codons
-    start, stop = extract_codon_1bact(fasta, gff)
+    #%% Transformation to dataframe within proportions
+    dfstart, dfstop = extract_codon(fasta, gff)
 
-    #%% START : Transformation to dataframe within proportions
-    dfstart = give_df_codon_pption_per_phylum(counter_and_proportion(start))
-    if phylum == "fusobacteria":  # drop outlier for fuso (temporal solution)
+    if phylum_name == "fusobacteria":  # drop outlier for fuso (temporal solution)
         dfstart.drop('NG_050724.1', inplace=True) 
     dfs_start.append(dfstart)
 
-    #%% STOP : Transformation to dataframe within proportions
-    dfs_stop.append(give_df_codon_pption_per_phylum(counter_and_proportion(stop)))
+    dfs_stop.append(dfstop)
+
+    #%% save dataframes
+    dfstart.to_csv(f"{phylum_name}_start.csv", index=False)
+    dfstop.to_csv(f"{phylum_name}_stop.csv", index=False)
 
 #%% Graph and visualization
 # =========================
 # Start:
-for df, phylum_name in zip(dfs_start, phylum):
+for df, phylum_name in zip(dfs_start, list_phylum):
     # Stacked bar graphs
     top3_stacked_barplot(df, phylum_name, "start")
 # PCA plot
-PCA_tous(dfs_start, phylum)
+PCA_all(dfs_start, list_phylum)
 # Boxplots top3
-boxplots_tous(dfs_start, phylum)
+boxplots_all(dfs_start, list_phylum)
 
 # Stop:
-for df, phylum_name in zip(dfs_stop, phylum):
+for df, phylum_name in zip(dfs_stop, list_phylum):
     # Stacked bar graphs
     top3_stacked_barplot(df, phylum_name, "stop")
 # PCA plot
-PCA_tous(dfs_stop, phylum)
+PCA_all(dfs_stop, list_phylum)
 # Boxplots top3
-boxplots_tous(dfs_stop, phylum)
+boxplots_all(dfs_stop, list_phylum)
