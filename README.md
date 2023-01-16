@@ -4,5 +4,12 @@ This project is part of "Défi-Bioinformatique" at INSA/ENSAT Toulouse, France, 
 
 The main script is written in `main.py`. Run this code in a terminal with the following command:
 ```
-python main.py 
+$ python main.py
+</> Preprocessing gff at demo_data\fusobacteria.gff3
+</> Preprocessing fasta at demo_data\fusobacteria.fasta
+    Extracting codon: 100%|████████████████████████████████████████████████████████████| 75/75 [01:28<00:00,  1.18s/it]
+</> Preprocessing gff at demo_data\spirochetes.gff3
+</> Preprocessing fasta at demo_data\spirochetes.fasta
+    Extracting codon: 100%|████████████████████████████████████████████████████████████| 75/75 [01:09<00:00,  1.08it/s]
 ```
+

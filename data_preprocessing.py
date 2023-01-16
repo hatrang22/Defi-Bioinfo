@@ -1,93 +1,37 @@
-import  gzip
-import os
-import tarfile
-import warnings
-from shutil import rmtree
+import pandas as pd
+from Bio import SeqIO
 
-def read_phylum(fasta_path, gff_path):
-    """
-    Parameters
-    ----------
-    fasta_path: str
-            Path to fasta tar file.
+#%% df_gff
+def preprocess_gff(gff_datapath) :
 
-    gff_path: str
-            Path to gff tar file.
+    print(f"</> Preprocessing gff at {gff_datapath}")
 
-    Returns
-    -------
-    ret: dict
-        Dictionary with 3 keys:
+    df_gff = pd.read_csv(gff_datapath, sep='\t', skiprows = 5, header= None,
+                         usecols = list(range(0,8)),
+                         names = ['ID', 'RefSeq', 'type', 'start', 'stop', 'dot1', 'strand', 'dot2']
+                         )
+                         
+    df_gff = df_gff[df_gff['type'] == 'CDS'] # filter 'CDS'
 
-            - accession_number: list of accession numbers
-            - fasta: list of corresponding fastas
-            - gff: list of corresponding gffs
-    """
+    return(df_gff)
 
-    fasta_dir = os.path.splitext(fasta_path)[0] # remove extension file
-    with tarfile.open(fasta_path) as f:
-        f.extractall(fasta_dir)
+#%% df_fasta
+def preprocess_fasta(fasta_datapath):
 
-    fasta_dir_extract = os.path.join(fasta_dir, os.listdir(fasta_dir)[0]) # files extracted in fasta_dir_extract
+    print(f"</> Preprocessing fasta at {fasta_datapath}")
 
-    gff_dir = os.path.splitext(gff_path)[0] # remove extension file
-    with tarfile.open(gff_path) as f:
-        f.extractall(gff_dir)
+    fasta_dictio = {}
 
-    gff_dir_extract = os.path.join(gff_dir, os.listdir(gff_dir)[0]) # files extracted in gffr_dir_extract
+    fasta_sequences = SeqIO.parse(open(fasta_datapath),'fasta')
 
-    list_fasta = [f for f in os.listdir(fasta_dir_extract) if f.endswith(".gz")]
-    list_fasta.sort()  # list of sorted fasta names
+    for fasta in fasta_sequences:
 
-    list_gff = [f for f in os.listdir(gff_dir_extract) if f.endswith(".gz")]
-    list_gff.sort()  # list of sorted gff names
+        identity, sequence, description = str(fasta.id), str(fasta.seq), str(fasta.description)
 
-    ret = {"accession_number": [], "fasta": [], "gff": []}  # returned dict
+        if 'plasmid' in description :
+            continue
 
-    for fasta_fn, gff_fn in zip(list_fasta, list_gff):
-
-        fan = fasta_fn.split("_")
-        fan = "_".join(fan[:2])  # get accession number for fasta
-
-        gan = gff_fn.split("_")
-        gan = "_".join(gan[:2])  # get accession number for gff
-
-        if fan == gan:  # check if accession numbers are consistent
-
-            fasta, gff = preprocessing_fasta_gff(
-                                        os.path.join(fasta_dir_extract, fasta_fn), 
-                                        os.path.join(gff_dir_extract, gff_fn)
-                                    )
-
-            ret["fasta"].append(fasta)
-
-            ret["gff"].append(gff)
-
-            ret["accession_number"].append(fan)
-
-        else:
-            warnings.warn(f"Inconsistent accession number between fasta file ({fan}) and gff file ({gan})")
+        else :
+            fasta_dictio[identity] = sequence
             
-    rmtree(fasta_dir)  # remove extracted fasta directory
-    rmtree(gff_dir)  # remove extracted gff directory
-
-    return ret
-
-def preprocessing_fasta_gff(fasta_gz, gff_gz):
-
-    with gzip.open(fasta_gz, "rt") as gzip_fasta:
-
-        fasta= []
-        for f in gzip_fasta.readlines(): 
-            if f[0].isalpha(): # check if the line starts with an alphabet
-                fasta.append(f) # add to list fasta
-            elif fasta: # if "chevron" has been already added to fasta, then break 
-                break
-        fasta = "".join(fasta) # concatenate list of string to string
-        fasta = fasta.replace("\n","") # replace \n
-
-    with gzip.open(gff_gz, "rt") as gzip_gff:
-
-        gff = [f.split("\t") for f in gzip_gff.readlines() if f[0].isalpha()] # keeping only the line starting with a letter
-
-    return fasta, gff
+    return fasta_dictio
