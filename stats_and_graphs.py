@@ -2,6 +2,8 @@ import pandas as pd
 import seaborn as sns
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix as cfm
+from sklearn.cluster import KMeans, AgglomerativeClustering
 
 #%% TOP3
 def top3_stacked_barplot(dataframe, phylum, startoustop):
@@ -101,4 +103,41 @@ def boxplots_all(dfs, pls):
     plt.xlabel('Top 3 codons')
     plt.ylabel('Proportion (%)')
     fig.legend(ncol=4,bbox_to_anchor =(0.45,-0.35),loc="lower center")
+    plt.show()
+
+def clustering(dfs, n_cluster, method):
+
+    method = method.lower()
+
+    df = pd.concat(dfs, ignore_index=True).drop("ID", axis=1)
+    df = df.fillna(0)
+    
+    X = df.to_numpy()
+
+    if method == "kmeans":
+        opt = KMeans(n_clusters=n_cluster)
+
+    elif method == "ac" or method == "agglomerativeclustering":
+        opt = AgglomerativeClustering(n_clusters=n_cluster)
+
+    else:
+        raise ValueError(f"Unknown clustering method {method}")
+
+    opt = opt.fit(X)
+
+    return opt
+
+def plot_confusion_matrix(opt, dfs, pls):
+    
+    target = []
+    for i in range(len(dfs)):
+        target += [i for j in range(len(dfs[i]))]
+
+    mat = cfm(target, opt.labels_)
+    sns.heatmap(mat.T, square=True, annot=True, fmt='d', cbar=False,
+                xticklabels=pls,
+                yticklabels=range(len(pls)))
+    plt.xlabel('Phylum')
+    plt.xticks(rotation=15, ha='right', fontsize=5)
+    plt.ylabel('Group')
     plt.show()
