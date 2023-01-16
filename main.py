@@ -1,6 +1,6 @@
 import pandas as pd
 import os
-from stats_and_graphs import (top3_stacked_barplot, PCA_all, boxplots_all, clustering, plot_confusion_matrix)
+from stats_and_graphs import (top3_stacked_barplot, PCA_all, boxplots_all, clustering, plot_clustering)
 
 #%% DEFINE GLOBAL VARIABLES
 # =========================
@@ -48,14 +48,14 @@ boxplots_all(dfs_stop, LIST_PHYLUM)
 # ============
 # Start with Kmeans:
 kmeans = clustering(dfs_start, n_cluster=len(dfs_start), method="kmeans")
-plot_confusion_matrix(kmeans, dfs_start, LIST_PHYLUM)
+plot_clustering(kmeans, dfs_start, LIST_PHYLUM, "kmeans", "start")
 # Start with AgglomerativeHierachiqueClustering:
 ac = clustering(dfs_start, n_cluster=len(dfs_start), method="ac")
-plot_confusion_matrix(ac, dfs_start, LIST_PHYLUM)
+plot_clustering(ac, dfs_start, LIST_PHYLUM, "agglomerativeclustering", "start")
 
 # Stop with Kmeans:
 kmeans_2 = clustering(dfs_stop, n_cluster=len(dfs_stop), method="kmeans")
-plot_confusion_matrix(kmeans_2, dfs_stop, LIST_PHYLUM)
+plot_clustering(kmeans_2, dfs_stop, LIST_PHYLUM, "kmeans", "stop")
 # Stop with AgglomerativeHierachiqueClustering:
 ac_2 = clustering(dfs_stop, n_cluster=len(dfs_stop), method="ac")
-plot_confusion_matrix(ac_2, dfs_stop, LIST_PHYLUM)
+plot_clustering(ac_2, dfs_stop, LIST_PHYLUM, "agglomerativeclustering", "stop")

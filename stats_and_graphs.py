@@ -2,8 +2,10 @@ import pandas as pd
 import seaborn as sns
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
+import numpy as np
 from sklearn.metrics import confusion_matrix as cfm
 from sklearn.cluster import KMeans, AgglomerativeClustering
+from scipy.cluster.hierarchy import dendrogram
 
 #%% TOP3
 def top3_stacked_barplot(dataframe, phylum, startoustop):
@@ -118,7 +120,7 @@ def clustering(dfs, n_cluster, method):
         opt = KMeans(n_clusters=n_cluster)
 
     elif method == "ac" or method == "agglomerativeclustering":
-        opt = AgglomerativeClustering(n_clusters=n_cluster)
+        opt = AgglomerativeClustering(n_clusters=n_cluster, compute_distances=True)
 
     else:
         raise ValueError(f"Unknown clustering method {method}")
@@ -127,8 +129,31 @@ def clustering(dfs, n_cluster, method):
 
     return opt
 
-def plot_confusion_matrix(opt, dfs, pls):
+def plot_dendrogram(model, **kwargs):
+    # Create linkage matrix and then plot the dendrogram
+
+    # create the counts of samples under each node
+    counts = np.zeros(model.children_.shape[0])
+    n_samples = len(model.labels_)
+    for i, merge in enumerate(model.children_):
+        current_count = 0
+        for child_idx in merge:
+            if child_idx < n_samples:
+                current_count += 1  # leaf node
+            else:
+                current_count += counts[child_idx - n_samples]
+        counts[i] = current_count
+
+    linkage_matrix = np.column_stack(
+        [model.children_, model.distances_, counts]
+    ).astype(float)
+
+    # Plot the corresponding dendrogram
+    dendrogram(linkage_matrix, **kwargs)
+
+def plot_clustering(opt, dfs, pls, method, startoustop):
     
+    # Confusion Matrix
     target = []
     for i in range(len(dfs)):
         target += [i for j in range(len(dfs[i]))]
@@ -140,4 +165,12 @@ def plot_confusion_matrix(opt, dfs, pls):
     plt.xlabel('Phylum')
     plt.xticks(rotation=15, ha='right', fontsize=5)
     plt.ylabel('Group')
+    plt.title(f"Confusion Matrix of {startoustop} codons using {method} method")
     plt.show()
+
+    if method == "ac" or method == "agglomerativeclustering":
+        # Hierarchical Clustering Dendrogram
+        plot_dendrogram(opt, truncate_mode="level", p=3)
+        plt.xlabel("Number of points in node (or index of point if no parenthesis).")
+        plt.title(f"Hierarchical Clustering Dendrogram of {startoustop} codons using {method} method")
+        plt.show()
