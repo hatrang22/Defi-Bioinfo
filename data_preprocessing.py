@@ -38,20 +38,38 @@ def preprocess_fasta(fasta_datapath):
             
     return fasta_dictio
 
-def data_preprocessing(data_dir, save_dir="data", fasta_ext=".fasta", gff_ext=".gff3"):
+def data_preprocessing(raw_data_path, list_phylum, save_dir="data", fasta_ext=".fasta", gff_ext=".gff3"):
     """
-    Read fasta and gff data, extract condons and convert into DataFrame.
-    """
+    Read fasta/gff files, extract condons, then convert into DataFrame and save results.
 
-    list_phylum = [f.split(".")[0].lower() for f in os.listdir(data_dir) if f.endswith("fasta")]  # get list of phylum
+    Parameters
+    ----------
+    raw_data_path : str
+        Path to raw data (fasta and gff files).
+
+    list_phylum : list of str
+        List of studied phylum names.
+
+    save_dir : str, default 'data'
+        Path to save output dataframes.
+
+    fasta_ext : str, default '.fasta'
+        Extension of fasta files.
+
+    gff_ext : str, default '.gff3'
+        Extension of gff files.
+    """
 
     dfs_start = []
     dfs_stop = []
 
     for phylum_name in list_phylum:
+
+        phylum_name = phylum_name.lower()
+
         #%% Import files: fasta and gff
-        gff = preprocess_gff(os.path.join(data_dir, phylum_name + gff_ext))
-        fasta = preprocess_fasta(os.path.join(data_dir, phylum_name + fasta_ext))
+        gff = preprocess_gff(os.path.join(raw_data_path, phylum_name + gff_ext))
+        fasta = preprocess_fasta(os.path.join(raw_data_path, phylum_name + fasta_ext))
 
         #%% Transformation to dataframe within proportions
         dfstart, dfstop = extract_codon(fasta, gff)
@@ -75,6 +93,14 @@ def data_preprocessing(data_dir, save_dir="data", fasta_ext=".fasta", gff_ext=".
 
 if __name__ == '__main__':
 
-    DATA_DIR = "raw_data"  # path to raw data (fasta and gff)
+    RAW_DATA_PATH = "../raw_data"  # Path to raw data (fasta and gff)
 
-    data_preprocessing(DATA_DIR)
+    LIST_PHYLUM = ['Actinobacteria',
+                'CFB',
+                'Cyanobacteria',
+                'Firmicutes',
+                'Fusobacteria',
+                'Proteobacteria',
+                'Spirochetes']  # All studied phylums
+
+    data_preprocessing(RAW_DATA_PATH, LIST_PHYLUM)
