@@ -33,7 +33,8 @@ def top3_stacked_barplot(dataframe, phylum, startoustop):
     fig=sous_df.plot(x = 'ID', kind = 'barh', stacked = True, 
                        title = f"Stacked Bar Graph of {phylum} {startoustop} codons", 
                        mark_right = True, figsize=(8,10), fontsize=10)
-    fig.legend(ncol=4,bbox_to_anchor =(0.4,-0.1),loc="lower center")
+    # fig.legend(ncol=4,bbox_to_anchor =(0.4,-0.1),loc="lower center")
+    plt.yticks([])  # Hide ID number to avoid overlapping lables
     plt.show()
 
 #%% PCA

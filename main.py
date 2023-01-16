@@ -1,56 +1,45 @@
-from data_preprocessing import data_preprocessing
-from codon_extraction import extract_codon
-from stats_and_graphs import (top3_stacked_barplot, PCA_all, boxplots_all)
+import pandas as pd
 import os
+from stats_and_graphs import (top3_stacked_barplot, PCA_all, boxplots_all)
 
-#%% Define global variables
+#%% DEFINE GLOBAL VARIABLES
 # =========================
-DATA_PATH = "../data"
+DATA_PATH = "./data"
 
-FASTA_EXTENSION = ".fasta"
-GFF_EXTENSION = ".gff3"
-###
+LIST_PHYLUM = ['Actinobacteria',
+                'CFB',
+                'Cyanobacteria',
+                'Firmicutes',
+                'Fusobacteria',
+                'Proteobacteria',
+                'Spirochetes']
 
-#%% Preprocessing data and transformation to dataframe
-# ====================================================
-list_phylum = [f.split(".")[0] for f in os.listdir(DATA_PATH) if f.endswith("fasta")]  # get list of phylum
-
+#%% READ DATAFRAME
+# ================
 dfs_start = []
 dfs_stop = []
 
-for phylum_name in list_phylum:
-    #%% Import files: fasta and gff
-    fasta, gff = data_preprocessing(DATA_PATH, phylum_name, FASTA_EXTENSION, GFF_EXTENSION)
-
-    #%% Transformation to dataframe within proportions
-    dfstart, dfstop = extract_codon(fasta, gff)
-
-    if phylum_name == "fusobacteria":  # drop outlier for fuso (temporal solution)
-        dfstart.drop('NG_050724.1', inplace=True) 
-    dfs_start.append(dfstart)
-
-    dfs_stop.append(dfstop)
-
+for phylum_name in LIST_PHYLUM:
     #%% save dataframes
-    dfstart.to_csv(f"{phylum_name}_start.csv", index=False)
-    dfstop.to_csv(f"{phylum_name}_stop.csv", index=False)
+    dfs_start.append(pd.read_csv(os.path.join(DATA_PATH, f"{phylum_name.lower()}_start.csv")))
+    dfs_stop.append(pd.read_csv(os.path.join(DATA_PATH, f"{phylum_name.lower()}_stop.csv")))
 
-#%% Graph and visualization
+#%% GRAPH AND VISUALIZATION
 # =========================
 # Start:
-for df, phylum_name in zip(dfs_start, list_phylum):
+for df, phylum_name in zip(dfs_start, LIST_PHYLUM):
     # Stacked bar graphs
     top3_stacked_barplot(df, phylum_name, "start")
 # PCA plot
-PCA_all(dfs_start, list_phylum)
+PCA_all(dfs_start, LIST_PHYLUM)
 # Boxplots top3
-boxplots_all(dfs_start, list_phylum)
+boxplots_all(dfs_start, LIST_PHYLUM)
 
 # Stop:
-for df, phylum_name in zip(dfs_stop, list_phylum):
+for df, phylum_name in zip(dfs_stop, LIST_PHYLUM):
     # Stacked bar graphs
     top3_stacked_barplot(df, phylum_name, "stop")
 # PCA plot
-PCA_all(dfs_stop, list_phylum)
+PCA_all(dfs_stop, LIST_PHYLUM)
 # Boxplots top3
-boxplots_all(dfs_stop, list_phylum)
+boxplots_all(dfs_stop, LIST_PHYLUM)

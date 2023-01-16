@@ -1,6 +1,7 @@
 import pandas as pd
 from Bio import SeqIO
 import os
+from codon_extraction import extract_codon
 
 #%% df_gff
 def preprocess_gff(gff_datapath) :
@@ -37,9 +38,43 @@ def preprocess_fasta(fasta_datapath):
             
     return fasta_dictio
 
-def data_preprocessing(data_dir, phylum_name, fasta_ext, gff_ext):
+def data_preprocessing(data_dir, save_dir="data", fasta_ext=".fasta", gff_ext=".gff3"):
+    """
+    Read fasta and gff data, extract condons and convert into DataFrame.
+    """
 
-    gff = preprocess_gff(os.path.join(data_dir, phylum_name + gff_ext))
-    fasta = preprocess_fasta(os.path.join(data_dir, phylum_name + fasta_ext))
+    list_phylum = [f.split(".")[0].lower() for f in os.listdir(data_dir) if f.endswith("fasta")]  # get list of phylum
 
-    return fasta, gff
+    dfs_start = []
+    dfs_stop = []
+
+    for phylum_name in list_phylum:
+        #%% Import files: fasta and gff
+        gff = preprocess_gff(os.path.join(data_dir, phylum_name + gff_ext))
+        fasta = preprocess_fasta(os.path.join(data_dir, phylum_name + fasta_ext))
+
+        #%% Transformation to dataframe within proportions
+        dfstart, dfstop = extract_codon(fasta, gff)
+
+        if phylum_name == "fusobacteria":  # drop outlier for fuso (temporal solution)
+            dfstart.drop('NG_050724.1', inplace=True) 
+        dfs_start.append(dfstart)
+
+        dfs_stop.append(dfstop)
+
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+
+        #%% save dataframes
+        dfstart.to_csv(os.path.join(save_dir, f"{phylum_name}_start.csv"), index=False)
+        dfstop.to_csv(os.path.join(save_dir, f"{phylum_name}_stop.csv"), index=False)
+
+
+### main preprocessing ###
+##########################
+
+if __name__ == '__main__':
+
+    DATA_DIR = "raw_data"  # path to raw data (fasta and gff)
+
+    data_preprocessing(DATA_DIR)
