@@ -10,7 +10,7 @@ def preprocess_gff(gff_datapath) :
 
     df_gff = pd.read_csv(gff_datapath, sep='\t', skiprows = 5, header= None,
                          usecols = list(range(0,8)),
-                         names = ['ID', 'RefSeq', 'type', 'start', 'stop', 'dot1', 'strand', 'dot2']
+                         names = ['ID', 'RefSeq', 'type', 'start', 'stop', 'score', 'strand', 'phase']
                          )
                          
     df_gff = df_gff[df_gff['type'] == 'CDS'] # filter 'CDS'
