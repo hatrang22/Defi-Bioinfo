@@ -6,6 +6,7 @@ import numpy as np
 from sklearn.metrics import confusion_matrix as cfm
 from sklearn.cluster import KMeans, AgglomerativeClustering
 from scipy.cluster.hierarchy import dendrogram
+from scipy.stats import chi2_contingency
 
 #%% TOP3
 def top3_stacked_barplot(dataframe, phylum, startoustop):
@@ -175,9 +176,7 @@ def plot_clustering(opt, dfs, pls, method, startoustop):
         plt.show()
         
 #%%Test khi2
-from scipy.stats import chi2_contingency
-
-def Khi2_test(dfs_start,LIST_PHYLUM):
+def chi2_test(dfs_start,LIST_PHYLUM):
     dfs = [df_pour_PCA(df, name) for df, name in zip(dfs_start, LIST_PHYLUM)]
     fusion=pd.concat(dfs, ignore_index=True)
     

@@ -1,6 +1,6 @@
 import pandas as pd
 import os
-from stats_and_graphs import (top3_stacked_barplot, PCA_all, boxplots_all, clustering, plot_clustering)
+from stats_and_graphs import (top3_stacked_barplot, PCA_all, boxplots_all, clustering, plot_clustering, chi2_test)
 
 #%% DEFINE GLOBAL VARIABLES
 # =========================
@@ -44,6 +44,15 @@ PCA_all(dfs_stop, LIST_PHYLUM)
 # Boxplots top3
 boxplots_all(dfs_stop, LIST_PHYLUM)
 
+#%% TESTS STATS
+# =============
+# Chi2
+p_val_start = chi2_test(dfs_start,LIST_PHYLUM)
+print(f"Chi-square test on start codons: p-value={p_val_start}")
+
+p_val_stop = chi2_test(dfs_stop,LIST_PHYLUM)
+print(f"Chi-square test on stop codons: p-value={p_val_stop}")
+
 #%% CLUSTERING
 # ============
 # Start with Kmeans:
@@ -60,8 +69,3 @@ plot_clustering(kmeans_2, dfs_stop, LIST_PHYLUM, "kmeans", "stop")
 ac_2 = clustering(dfs_stop, n_cluster=len(dfs_stop), method="ac")
 plot_clustering(ac_2, dfs_stop, LIST_PHYLUM, "agglomerativeclustering", "stop")
 
-#%% TESTS STATS
-# ============
-#Khi2
-p_val_start = Khi2_test(dfs_start,LIST_PHYLUM)
-p_val_stop = Khi2_test(dfs_stop,LIST_PHYLUM)
