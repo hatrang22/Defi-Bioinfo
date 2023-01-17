@@ -59,3 +59,9 @@ plot_clustering(kmeans_2, dfs_stop, LIST_PHYLUM, "kmeans", "stop")
 # Stop with AgglomerativeHierachiqueClustering:
 ac_2 = clustering(dfs_stop, n_cluster=len(dfs_stop), method="ac")
 plot_clustering(ac_2, dfs_stop, LIST_PHYLUM, "agglomerativeclustering", "stop")
+
+#%% TESTS STATS
+# ============
+#Khi2
+p_val_start = Khi2_test(dfs_start,LIST_PHYLUM)
+p_val_stop = Khi2_test(dfs_stop,LIST_PHYLUM)
