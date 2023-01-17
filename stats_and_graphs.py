@@ -33,7 +33,6 @@ def top3_stacked_barplot(dataframe, phylum, startoustop):
     sous_df = sous_df.assign(ID=list(dataframe.index))
     
     #on crée une figure du top3
-    #plt.figure(figsize=(300,150))
     fig=sous_df.plot(x = 'ID', kind = 'barh', stacked = True, 
                        title = f"Stacked Bar Graph of {phylum} {startoustop} codons", 
                        mark_right = True, figsize=(8,10), fontsize=10)
@@ -77,7 +76,7 @@ def PCA_all(dfs, pls):
     fig=sns.scatterplot(x=pcs[:,0], y=pcs[:,1], hue=fusion['phylum']) 
     plt.xlabel('PC 1 (%.2f%%)' % (pca.explained_variance_ratio_[0]*100))
     plt.ylabel('PC 2 (%.2f%%)' % (pca.explained_variance_ratio_[1]*100))
-    fig.legend(ncol=4,bbox_to_anchor =(0.45,-0.35),loc="lower center")
+    fig.legend(fontsize=8)
     plt.show()
 
 #%% BOXPLOTS
@@ -104,7 +103,7 @@ def boxplots_all(dfs, pls):
     fig=sns.boxplot(x='variable', y='value', data=boxs_fusion, hue='phylum')
     plt.xlabel('Top 3 codons')
     plt.ylabel('Proportion (%)')
-    fig.legend(ncol=4,bbox_to_anchor =(0.45,-0.35),loc="lower center")
+    fig.legend(fontsize=8)
     plt.show()
 
 def clustering(dfs, n_cluster, method):
