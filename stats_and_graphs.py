@@ -173,3 +173,21 @@ def plot_clustering(opt, dfs, pls, method, startoustop):
         plt.xlabel("Number of points in node (or index of point if no parenthesis).")
         plt.title(f"Hierarchical Clustering Dendrogram of {startoustop} codons using {method} method")
         plt.show()
+        
+#%%Test khi2
+from scipy.stats import chi2_contingency
+
+def Khi2_test(dfs_start,LIST_PHYLUM):
+    dfs = [df_pour_PCA(df, name) for df, name in zip(dfs_start, LIST_PHYLUM)]
+    fusion=pd.concat(dfs, ignore_index=True)
+    
+    l=[]
+    for phylum in LIST_PHYLUM:
+        df_phylum=fusion[fusion['phylum']==phylum][['ATG','GTG','TTG']]
+        l.append(df_phylum.mean(axis=0).rename(phylum))
+        df = pd.concat(l,axis=1).T
+        
+    chi2_res = chi2_contingency(df)
+    p_value=chi2_res[1] #pvalue > 0.05 : H0 accepté, les variables Phylum et fréq allelique sont indépendantes
+    
+    return p_value
