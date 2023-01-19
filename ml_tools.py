@@ -5,7 +5,9 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import RidgeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import confusion_matrix as cfm
+from sklearn.svm import SVC
+from sklearn.neural_network import MLPClassifier
+from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score
 
 def clustering(dfs, n_cluster, method, top3_only=False):
@@ -26,7 +28,7 @@ def clustering(dfs, n_cluster, method, top3_only=False):
     if method == "kmeans":
         opt = KMeans(n_clusters=n_cluster)
 
-    elif method == "ac" or method == "agglomerativeclustering":
+    elif method == "agglomerativeclustering":
         opt = AgglomerativeClustering(n_clusters=n_cluster, compute_distances=True)
 
     else:
@@ -36,7 +38,7 @@ def clustering(dfs, n_cluster, method, top3_only=False):
 
     return opt
 
-def classify(dfs, method, test_size=0.33, top3_only=False):
+def classify(dfs, method, test_size=0.33, split_seed=0, training_seed=0, top3_only=False):
 
     top3 = ["ATG", "GTG", "TTG"]
 
@@ -55,19 +57,29 @@ def classify(dfs, method, test_size=0.33, top3_only=False):
     for i in range(len(dfs)):
         y += [i for j in range(len(dfs[i]))]
     
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=11)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=split_seed)
     
     if method == "linear":
-        model = RidgeClassifier()
+        model = RidgeClassifier(random_state=training_seed)
     
     elif method == "decisiontree":
-        model = DecisionTreeClassifier()
+        model = DecisionTreeClassifier(random_state=training_seed)
     
     elif method == "randomforest":
-        model = RandomForestClassifier()
+        model = RandomForestClassifier(random_state=training_seed)
 
     elif method == "kneighbors":
         model = KNeighborsClassifier()
+
+    elif method == "svm":
+        model = SVC(random_state=training_seed)
+
+    elif method == "neuralnetwork":
+        model = MLPClassifier(hidden_layer_sizes=(X.shape[-1],),  # number of neurons based on number of features 
+                                solver="lbfgs",  # for small datasets, lbfgs solver can work better
+                                early_stopping=True,  # to avoid overfitting using validation set
+                                random_state=training_seed,  # random seed to initialize weights
+                                max_iter=400)  # max iteration
     
     else:
         raise ValueError(f"Unknown classification method {method}")
@@ -76,7 +88,7 @@ def classify(dfs, method, test_size=0.33, top3_only=False):
 
     y_pred = model.predict(X_test)
 
-    mat = cfm(y_test, y_pred)
+    mat = confusion_matrix(y_test, y_pred)
 
     global_score = accuracy_score(y_test, y_pred)
 

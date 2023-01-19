@@ -3,9 +3,8 @@ import seaborn as sns
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 import numpy as np
-from sklearn.metrics import confusion_matrix as cfm
+from sklearn.metrics import confusion_matrix
 from scipy.cluster.hierarchy import dendrogram
-from scipy.stats import chi2_contingency
 
 
 #%% TOP3
@@ -13,10 +12,14 @@ def top3_stacked_barplot(dataframe, phylum, startoustop):
     """
     Parameters
     ----------
-    dataframe : panda dataframe, sortie de give_df_codon_pption_per_phylum
-    phylum : str, nom du phylum
-    startoustop : str, start ou stop selon la nature des codons
-    
+    dataframe : pandas DataFrame
+            Output of give_df_codon_pption_per_phylum
+
+    phylum : str,
+            phylum name
+
+    startoustop : str
+            start or stop according to the nature of the codons
     """
     #On cherche le top3
     sum = dataframe.sum()
@@ -39,6 +42,7 @@ def top3_stacked_barplot(dataframe, phylum, startoustop):
                        mark_right = True, figsize=(8,10), fontsize=10)
     fig.legend(ncol=4,bbox_to_anchor =(0.4,-0.1),loc="lower center")
     plt.yticks([])  # Hide ID number to avoid overlapping lables
+    plt.savefig(f"figs/barplot_{phylum}_{startoustop}_codons.png")
     plt.show()
 
 #%% PCA
@@ -78,6 +82,7 @@ def PCA_all(dfs, pls):
     plt.xlabel('PC 1 (%.2f%%)' % (pca.explained_variance_ratio_[0]*100))
     plt.ylabel('PC 2 (%.2f%%)' % (pca.explained_variance_ratio_[1]*100))
     fig.legend(fontsize=8)
+    plt.savefig("figs/PCA.png")
     plt.show()
 
 #%% BOXPLOTS
@@ -105,6 +110,7 @@ def boxplots_all(dfs, pls):
     plt.xlabel('Top 3 codons')
     plt.ylabel('Proportion (%)')
     fig.legend(fontsize=8)
+    plt.savefig(f"figs/condons_proportion_boxplot.png")
     plt.show()
 
 def plot_dendrogram(model, **kwargs):
@@ -136,24 +142,30 @@ def plot_clustering(opt, dfs, pls, method, startoustop):
     for i in range(len(dfs)):
         target += [i for j in range(len(dfs[i]))]
 
-    mat = cfm(target, opt.labels_)
+    mat = confusion_matrix(target, opt.labels_)
+
     sns.heatmap(mat.T, square=True, annot=True, fmt='d', cbar=False,
                 xticklabels=pls,
                 yticklabels=range(len(pls)))
+
     plt.xlabel('Phylum')
     plt.xticks(rotation=15, ha='right', fontsize=5)
     plt.ylabel('Group')
     plt.title(f"Confusion Matrix of {startoustop} codons using {method} method")
+    plt.savefig(f"figs/CM_clustering_{startoustop}_codons_{method}.png")
     plt.show()
 
     if method == "ac" or method == "agglomerativeclustering":
         # Hierarchical Clustering Dendrogram
         plot_dendrogram(opt, truncate_mode="level", p=3)
+
         plt.xlabel("Number of points in node (or index of point if no parenthesis).")
         plt.title(f"Hierarchical Clustering Dendrogram of {startoustop} codons using {method} method")
+        plt.savefig(f"figs/dendrogram_{startoustop}_codons.png")
         plt.show()
 
 def plot_classify(mat, method, list_phylum, startoustop):
+
     sns.heatmap(mat.T, square=True, annot=True, fmt='d', cbar=False,
                 xticklabels=list_phylum,
                 yticklabels=list_phylum)
@@ -162,24 +174,11 @@ def plot_classify(mat, method, list_phylum, startoustop):
     plt.ylabel('Prediction')
     plt.yticks(rotation=15, ha='right', fontsize=5)
     plt.title(f"Confusion Matrix of {startoustop} codons using {method} classification")
-    plt.show()    
+    plt.savefig(f"figs/CM_classification_{startoustop}_codons_{method}.png")
+    plt.show()
+
     score = mat.diagonal()/mat.sum(axis=1)
     print(f"</> Scores of prediction based on {startoustop} codon:")
+
     for s, phylum in zip(score, list_phylum):
         print(f"    Phylum {phylum}: {s}")
-
-#%%Test khi2
-def chi2_test(dfs_start,LIST_PHYLUM):
-    dfs = [df_pour_PCA(df, name) for df, name in zip(dfs_start, LIST_PHYLUM)]
-    fusion=pd.concat(dfs, ignore_index=True)
-    
-    l=[]
-    for phylum in LIST_PHYLUM:
-        df_phylum=fusion[fusion['phylum']==phylum][['ATG','GTG','TTG']]
-        l.append(df_phylum.mean(axis=0).rename(phylum))
-        df = pd.concat(l,axis=1).T
-        
-    chi2_res = chi2_contingency(df)
-    p_value=chi2_res[1] #pvalue > 0.05 : H0 accepté, les variables Phylum et fréq allelique sont indépendantes
-    
-    return p_value
