@@ -28,9 +28,41 @@ $ python data_preprocessing.py
     Extracting codons: 100%|███████████████████████████████████████████████████████████| 75/75 [01:11<00:00,  1.05it/s]
 ```
 
-The main script is written in `main.py` involving statistical visualization and cluster analysis. Run this code in a terminal with the following command:
+The main script is written in `main.py` involving statistical visualization, cluster analysis and classification. Run this code in a terminal with the following command:
 ```
 $ python main.py
+================
+Linear classification
+Scores of prediction based on start codon:
+Phylum Actinobacteria: 0.9354838709677419
+Phylum CFB: 1.0
+Phylum Proteobacteria: 0.0
+Phylum Firmicutes: 0.7619047619047619
+Global score: 0.6565656565656566
+================
+DecisionTree classification
+Scores of prediction based on start codon:
+Phylum Actinobacteria: 0.8709677419354839
+Phylum CFB: 0.8
+Phylum Proteobacteria: 0.5185185185185185
+Phylum Firmicutes: 0.7142857142857143
+Global score: 0.7272727272727273
+================
+KNeighbors classification
+Scores of prediction based on start codon:
+Phylum Actinobacteria: 0.9354838709677419
+Phylum CFB: 0.9
+Phylum Proteobacteria: 0.8148148148148148
+Phylum Firmicutes: 0.8095238095238095
+Global score: 0.8686868686868687
+================
+RandomForest classification
+Scores of prediction based on start codon:
+Phylum Actinobacteria: 0.9354838709677419
+Phylum CFB: 0.85
+Phylum Proteobacteria: 0.8148148148148148
+Phylum Firmicutes: 0.8571428571428571
+Global score: 0.8686868686868687
 ```
 
 

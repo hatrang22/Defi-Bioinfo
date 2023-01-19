@@ -4,9 +4,9 @@ from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.metrics import confusion_matrix as cfm
-from sklearn.cluster import KMeans, AgglomerativeClustering
 from scipy.cluster.hierarchy import dendrogram
 from scipy.stats import chi2_contingency
+
 
 #%% TOP3
 def top3_stacked_barplot(dataframe, phylum, startoustop):
@@ -107,28 +107,6 @@ def boxplots_all(dfs, pls):
     fig.legend(fontsize=8)
     plt.show()
 
-def clustering(dfs, n_cluster, method):
-
-    method = method.lower()
-
-    df = pd.concat(dfs, ignore_index=True).drop("ID", axis=1)
-    df = df.fillna(0)
-    
-    X = df.to_numpy()
-
-    if method == "kmeans":
-        opt = KMeans(n_clusters=n_cluster)
-
-    elif method == "ac" or method == "agglomerativeclustering":
-        opt = AgglomerativeClustering(n_clusters=n_cluster, compute_distances=True)
-
-    else:
-        raise ValueError(f"Unknown clustering method {method}")
-
-    opt = opt.fit(X)
-
-    return opt
-
 def plot_dendrogram(model, **kwargs):
     # Create linkage matrix and then plot the dendrogram
 
@@ -174,7 +152,22 @@ def plot_clustering(opt, dfs, pls, method, startoustop):
         plt.xlabel("Number of points in node (or index of point if no parenthesis).")
         plt.title(f"Hierarchical Clustering Dendrogram of {startoustop} codons using {method} method")
         plt.show()
-        
+
+def plot_classify(mat, method, list_phylum, startoustop):
+    sns.heatmap(mat.T, square=True, annot=True, fmt='d', cbar=False,
+                xticklabels=list_phylum,
+                yticklabels=list_phylum)
+    plt.xticks(rotation=15, ha='right', fontsize=5)
+    plt.xlabel('True label')
+    plt.ylabel('Prediction')
+    plt.yticks(rotation=15, ha='right', fontsize=5)
+    plt.title(f"Confusion Matrix of {startoustop} codons using {method} classification")
+    plt.show()    
+    score = mat.diagonal()/mat.sum(axis=1)
+    print(f"Scores of prediction based on {startoustop} codon:")
+    for s, phylum in zip(score, list_phylum):
+        print(f"Phylum {phylum}: {s}")
+
 #%%Test khi2
 def chi2_test(dfs_start,LIST_PHYLUM):
     dfs = [df_pour_PCA(df, name) for df, name in zip(dfs_start, LIST_PHYLUM)]
