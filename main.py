@@ -85,4 +85,4 @@ for method in LIST_CLASSIFICATION_METHOD:
     mat, global_score = classify(dfs_start, method, top3_only=False)
     
     plot_classify(mat, method, LIST_PHYLUM, "start")
-    print(f"Global score: {global_score}")
+    print(f"    Global score: {global_score}")
