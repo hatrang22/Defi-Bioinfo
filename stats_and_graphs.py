@@ -164,9 +164,9 @@ def plot_classify(mat, method, list_phylum, startoustop):
     plt.title(f"Confusion Matrix of {startoustop} codons using {method} classification")
     plt.show()    
     score = mat.diagonal()/mat.sum(axis=1)
-    print(f"Scores of prediction based on {startoustop} codon:")
+    print(f"</> Scores of prediction based on {startoustop} codon:")
     for s, phylum in zip(score, list_phylum):
-        print(f"Phylum {phylum}: {s}")
+        print(f"    Phylum {phylum}: {s}")
 
 #%%Test khi2
 def chi2_test(dfs_start,LIST_PHYLUM):
