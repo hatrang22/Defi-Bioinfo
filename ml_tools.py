@@ -170,3 +170,49 @@ def plot_roc_curve(tpr, fpr, classes, scatter = False):
     plt.ylabel("True Positive Rate")
     plt.title('ROC curve of '+ classes)
     plt.show()
+    
+def ROC_curves_and_AOC_scores(dfs):
+    fusion=pd.concat(dfs, ignore_index=True)
+    X_=fusion[['ATC','GTG','TTG','CTG']]
+    y_=fusion['phylum']
+    #split jeu de données
+    x_train, x_test, y_train, y_test  = train_test_split(X_, 
+                                                         y_, 
+                                                         test_size=0.25, 
+                                                         random_state=42)
+    #création du modèle
+    modele_rf = KNeighborsClassifier()
+    #apprentissage
+    modele_rf.fit(x_train, y_train)
+    #predict proba
+    y_scores = modele_rf.predict_proba(x_test)
+    
+    #ROC plot and ROC_auc_scores print
+    classes = modele_rf.classes_
+    roc_auc_ovr = {}
+
+    for i in range(len(classes)):
+        # Gets the class
+        c = classes[i]
+        
+        # Prepares an auxiliar dataframe to help with the plots
+        df_aux = x_test.copy()
+        df_aux['class'] = [1 if y == c else 0 for y in y_test]
+        df_aux['prob'] = y_scores[:, i]
+        df_aux = df_aux.reset_index(drop = True)
+        
+        # Calculates the ROC Coordinates and plots the ROC Curves
+        tpr, fpr = get_all_roc_coordinates(df_aux['class'], df_aux['prob'])
+        plot_roc_curve(tpr, fpr, scatter = False, classes=c)
+        
+        # Calculates the ROC AUC OvR
+        roc_auc_ovr[c] = roc_auc_score(df_aux['class'], df_aux['prob'])
+
+    # Displays the ROC AUC for each class
+    avg_roc_auc = 0
+    i = 0
+    for k in roc_auc_ovr:
+        avg_roc_auc += roc_auc_ovr[k]
+        i += 1
+        print(f"{k} ROC AUC OvR: {roc_auc_ovr[k]:.4f}")
+    print(f"average ROC AUC OvR: {avg_roc_auc/i:.4f}")
