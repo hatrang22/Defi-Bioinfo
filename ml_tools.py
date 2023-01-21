@@ -171,7 +171,8 @@ def plot_roc_curve(tpr, fpr, classes, scatter = False):
     plt.title('ROC curve of '+ classes)
     plt.show()
     
-def ROC_curves_and_AOC_scores(dfs):
+def ROC_curves_and_AOC_scores(dfs_start,LIST_PHYLUM):
+    dfs = [df_pour_PCA(df, name) for df, name in zip(dfs_start, LIST_PHYLUM)]
     fusion=pd.concat(dfs, ignore_index=True)
     X_=fusion[['ATC','GTG','TTG','CTG']]
     y_=fusion['phylum']
