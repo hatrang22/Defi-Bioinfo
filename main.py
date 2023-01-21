@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 from stats_and_graphs import (top3_stacked_barplot, PCA_all, boxplots_all, plot_clustering, plot_classify)
-from ml_tools import clustering, classify
+from ml_tools import clustering, classify, calculate_tpr_fpr, get_all_roc_coordinates, ROC_curves_and_AOC_scores
 
 
 #%% GLOBAL VARIABLES
@@ -72,3 +72,9 @@ for method in LIST_CLASSIFICATION_METHOD:
     
     plot_classify(mat, method, LIST_PHYLUM, "start")
     print(f"    Global score: {global_score}")
+    
+    
+ #%% ROC plot and ROC AUC calculation
+# ================
+
+ROC_curves_and_AOC_scores(dfs)
