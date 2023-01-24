@@ -175,7 +175,7 @@ def plot_roc_curve(tpr, fpr, classes, scatter = False):
 def ROC_curves_and_AOC_scores(dfs_start,LIST_PHYLUM):
     dfs = [df_pour_PCA(df, name) for df, name in zip(dfs_start, LIST_PHYLUM)]
     fusion=pd.concat(dfs, ignore_index=True)
-    X_=fusion[['ATC','GTG','TTG','CTG']]
+    X_=fusion[['ATC','GTG','TTG']]
     y_=fusion['phylum']
     #split jeu de données
     x_train, x_test, y_train, y_test  = train_test_split(X_, 
